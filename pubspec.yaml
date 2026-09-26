@@ -1,0 +1,76 @@
+name: ai_chat_assistant
+description: A production-oriented Flutter Veyra AI supporting OpenAI, Gemini, and OpenAI-compatible endpoints.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management & Architecture
+  flutter_bloc: ^9.0.0
+  equatable: ^2.0.5
+  get_it: ^8.0.0
+  go_router: ^15.0.0
+
+  # Storage & Security
+  hive_flutter: ^1.1.0
+  hive: ^2.2.3
+  flutter_secure_storage: ^9.2.0
+
+  # Networking
+  http: ^1.2.0
+
+  # UI Enhancement
+  google_fonts: ^6.2.1
+  flutter_markdown: ^0.7.7
+  shimmer: ^3.0.0
+  url_launcher: ^6.3.1
+  share_plus: ^10.1.4
+
+  # Animations
+  flutter_animate: ^4.5.2
+  animate_do: ^3.3.4
+  animated_text_kit: ^4.2.2
+
+  # Utilities
+  uuid: ^4.5.1
+  intl: ^0.20.2
+  image_picker: ^1.2.3
+  file_picker: ^11.0.3
+  speech_to_text: ^7.4.0
+  permission_handler: ^11.3.1
+  path_provider: ^2.1.6
+  path: ^1.9.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  mocktail: ^1.0.4
+  bloc_test: ^10.0.0
+  flutter_lints: ^5.0.0
+  flutter_native_splash: ^2.4.3
+  flutter_launcher_icons: ^0.14.3
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icon/
+
+flutter_native_splash:
+  color: "#ECFDF5"
+  image: assets/icon/app_icon.png
+  android_12:
+    color: "#ECFDF5"
+    icon_background_color: "#ECFDF5"
+    image: assets/icon/app_icon.png
+
+flutter_launcher_icons:
+  android: true
+  image_path: "assets/icon/app_icon.png"
+  adaptive_icon_background: "#D1FAE5"
+  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
