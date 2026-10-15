@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
@@ -23,6 +24,7 @@ const _keyboardAiChannel = MethodChannel('ai.veyra.keyboard_ai');
 /// It deliberately does not run the app UI or launch MainActivity.
 @pragma('vm:entry-point')
 Future<void> wingmanKeyboardMain() async {
+  WidgetsFlutterBinding.ensureInitialized();
   // Register only the provider/key/AI dependencies. The keyboard engine deliberately
   // does not open Hive boxes, avoiding concurrent access with the main app engine.
   final sl = GetIt.instance;
