@@ -34,8 +34,10 @@ class MainActivity : FlutterActivity() {
                 eventSink?.error("CAPTURE_NOT_READY", "Screen capture is not ready. Stop Wingman and start it again, approving screen capture.", null)
                 return
             }
-            pendingCapturePath = path
-            eventSink?.success(mapOf("type" to "capture", "path" to path))
+            val ocrText = intent.getStringExtra("ocr_text").orEmpty()
+            val payload = mapOf("type" to "capture", "path" to path, "ocrText" to ocrText)
+            if (eventSink == null) pendingCapturePath = path
+            eventSink?.success(payload)
         }
     }
 
@@ -82,7 +84,7 @@ class MainActivity : FlutterActivity() {
                 override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                     eventSink = events
                     pendingCapturePath?.let { path ->
-                        events?.success(mapOf("type" to "capture", "path" to path))
+                        events?.success(mapOf("type" to "capture", "path" to path, "ocrText" to ""))
                         pendingCapturePath = null
                     }
                 }
