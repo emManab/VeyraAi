@@ -67,3 +67,16 @@ flutter build appbundle --release
 
 ## License
 Currently unlicensed.
+
+
+## Veyra Wingman
+
+The Wingman screen is available from the home dashboard. It supports importing a screenshot from the device gallery or pasting conversation context, choosing a reply tone, and generating three contextual message suggestions through the selected Veyra AI provider. Replies can be edited and copied; Veyra does not send messages automatically. Analysis history is stored locally in the existing Hive `app_settings` box and can be cleared from the Wingman screen.
+
+### Current platform scope
+
+- **Android:** the UI can open the system overlay-permission settings, but cross-app screenshot capture and the draggable floating overlay are not yet implemented. Import a screenshot into Wingman to use the analysis workflow.
+- **iOS and other Flutter targets:** import a screenshot from Photos/Gallery. Arbitrary cross-app overlays and background screenshots are not supported by this implementation.
+- A configured vision-capable model is required for screenshot understanding. Some text-only models/providers may reject image attachments; paste the conversation as text if that happens.
+- Images are sent to the selected provider only after the user taps **Analyze & suggest replies**. The application does not continuously capture screens or automatically send messages.
+
