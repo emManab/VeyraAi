@@ -118,6 +118,7 @@ void main() {
           userMessage: any(named: 'userMessage'),
           config: any(named: 'config'),
           apiKey: any(named: 'apiKey'),
+          attachments: any(named: 'attachments'),
         )).thenAnswer((_) async => (null, const NetworkError()));
 
     final (result, error) = await usecase(
