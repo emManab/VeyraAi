@@ -24,6 +24,7 @@ class MainActivity : FlutterActivity() {
     private var pendingStartResult: MethodChannel.Result? = null
     private var eventSink: EventChannel.EventSink? = null
     private var pendingCapturePath: String? = null
+    private var pendingOcrText: String = ""
     private var receiverRegistered = false
 
     private val captureReceiver = object : BroadcastReceiver() {
@@ -36,7 +37,10 @@ class MainActivity : FlutterActivity() {
             }
             val ocrText = intent.getStringExtra("ocr_text").orEmpty()
             val payload = mapOf("type" to "capture", "path" to path, "ocrText" to ocrText)
-            if (eventSink == null) pendingCapturePath = path
+            if (eventSink == null) {
+                pendingCapturePath = path
+                pendingOcrText = ocrText
+            }
             eventSink?.success(payload)
         }
     }
@@ -84,8 +88,9 @@ class MainActivity : FlutterActivity() {
                 override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                     eventSink = events
                     pendingCapturePath?.let { path ->
-                        events?.success(mapOf("type" to "capture", "path" to path, "ocrText" to ""))
+                        events?.success(mapOf("type" to "capture", "path" to path, "ocrText" to pendingOcrText))
                         pendingCapturePath = null
+                        pendingOcrText = ""
                     }
                 }
 
