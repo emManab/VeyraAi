@@ -1,11 +1,20 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:get_it/get_it.dart';
+import 'package:http/http.dart' as http;
 
-import 'core/di/service_locator.dart';
+import 'data/datasources/free_ai_client.dart';
+import 'data/datasources/gemini_client.dart';
+import 'data/datasources/hive_settings_source.dart';
+import 'data/datasources/openai_client.dart';
+import 'data/repositories/ai_repository_impl.dart';
+import 'data/repositories/settings_repository_impl.dart';
 import 'domain/entities/ai_provider_config.dart';
 import 'domain/entities/message.dart';
 import 'domain/repositories/ai_repository.dart';
+import 'domain/repositories/settings_repository.dart';
 import 'domain/usecases/usecases.dart';
 
 const _keyboardAiChannel = MethodChannel('ai.veyra.keyboard_ai');
@@ -14,9 +23,25 @@ const _keyboardAiChannel = MethodChannel('ai.veyra.keyboard_ai');
 /// It deliberately does not run the app UI or launch MainActivity.
 @pragma('vm:entry-point')
 Future<void> wingmanKeyboardMain() async {
-  // Plugins and Hive-backed settings need a Flutter binding, but no widget tree.
-  // The engine is created by the IME and this entry point only serves requests.
-  await initDependencies();
+  // Register only the provider/key/AI dependencies. The keyboard engine deliberately
+  // does not open Hive boxes, avoiding concurrent access with the main app engine.
+  final sl = GetIt.instance;
+  sl.registerLazySingleton<http.Client>(() => http.Client());
+  sl.registerLazySingleton<FlutterSecureStorage>(
+    () => const FlutterSecureStorage(
+      aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    ),
+  );
+  sl.registerLazySingleton<HiveSettingsSource>(() => HiveSettingsSource(sl()));
+  sl.registerLazySingleton<SettingsRepository>(() => SettingsRepositoryImpl(sl()));
+  sl.registerLazySingleton<OpenAIClient>(() => OpenAIClient(sl<http.Client>()));
+  sl.registerLazySingleton<GeminiClient>(() => GeminiClient(sl<http.Client>()));
+  sl.registerLazySingleton<FreeAIClient>(() => FreeAIClient(sl<http.Client>()));
+  sl.registerLazySingleton<AIRepository>(
+    () => AIRepositoryImpl(sl<OpenAIClient>(), sl<GeminiClient>(), sl<FreeAIClient>()),
+  );
+  sl.registerLazySingleton<GetProviderConfig>(() => GetProviderConfig(sl()));
+  sl.registerLazySingleton<GetApiKey>(() => GetApiKey(sl()));
   _keyboardAiChannel.setMethodCallHandler((call) async {
     if (call.method != 'analyze') {
       throw MissingPluginException('Unsupported keyboard action: ${call.method}');
