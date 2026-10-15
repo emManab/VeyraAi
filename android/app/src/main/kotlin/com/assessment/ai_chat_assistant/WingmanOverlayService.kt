@@ -36,6 +36,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import android.widget.Toast
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
@@ -357,8 +358,7 @@ class WingmanOverlayService : Service() {
 
     private fun requestCapture() {
         if (!isCaptureReady || imageReader == null) {
-            val event = Intent(ACTION_CAPTURED).setPackage(packageName).putExtra(EXTRA_PATH, "")
-            sendBroadcast(event)
+            Toast.makeText(this, "Screen capture is not ready. Open Veyra and restart Wingman.", Toast.LENGTH_LONG).show()
             return
         }
         if (System.currentTimeMillis() - lastCaptureAt < 1200L) return
