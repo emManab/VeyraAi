@@ -7,7 +7,6 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/app_colors.dart';
 import 'core/theme/app_typography.dart';
-import 'package:go_router/go_router.dart';
 import 'presentation/blocs/settings/settings_state.dart';
 import 'presentation/blocs/conversation/conversation_bloc.dart';
 import 'presentation/blocs/conversation/conversation_event.dart';
