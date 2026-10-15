@@ -144,7 +144,7 @@ JSON schema:
       final text = (item['text'] ?? '').toString().trim();
       if (text.isEmpty) continue;
       final normalized = categories.firstWhere(
-        (candidate) => candidate.toLowerCase() == category.toLowerCase(),
+        (candidate) => category.toLowerCase().contains(candidate.toLowerCase()),
         orElse: () => 'Best',
       );
       if (replies.any((reply) => reply['category'] == normalized)) continue;
