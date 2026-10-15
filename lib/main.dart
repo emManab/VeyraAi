@@ -7,6 +7,7 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/app_colors.dart';
 import 'core/theme/app_typography.dart';
+import 'package:go_router/go_router.dart';
 import 'presentation/blocs/settings/settings_state.dart';
 import 'presentation/blocs/conversation/conversation_bloc.dart';
 import 'presentation/blocs/conversation/conversation_event.dart';
@@ -23,8 +24,44 @@ void main() async {
   runApp(const AIChatApp());
 }
 
-class AIChatApp extends StatelessWidget {
+class AIChatApp extends StatefulWidget {
   const AIChatApp({super.key});
+
+  @override
+  State<AIChatApp> createState() => _AIChatAppState();
+}
+
+class _AIChatAppState extends State<AIChatApp> {
+  static const _wingmanChannel = MethodChannel('ai.veyra.wingman');
+
+  @override
+  void initState() {
+    super.initState();
+    _wingmanChannel.setMethodCallHandler((call) async {
+      if (call.method == 'keyboardRequest') {
+        final text = call.arguments?.toString() ?? '';
+        if (text.trim().isNotEmpty) {
+          appRouter.go(Uri(path: '/wingman', queryParameters: {'keyboardText': text}).toString());
+        }
+      }
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        final text = await _wingmanChannel.invokeMethod<String>('consumeKeyboardRequest');
+        if (text != null && text.trim().isNotEmpty && mounted) {
+          appRouter.go(Uri(path: '/wingman', queryParameters: {'keyboardText': text}).toString());
+        }
+      } on PlatformException {
+        // The app can still be opened normally if the keyboard bridge is unavailable.
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _wingmanChannel.setMethodCallHandler(null);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
