@@ -109,7 +109,7 @@ class GeminiClient {
               .map((part) => part['text'])
               .whereType<String>()
               .where((part) => part.trim().isNotEmpty)
-              .join('\\n')
+              .join('\n')
           : '';
       if (text.trim().isEmpty) return (null, const InvalidResponseError());
       return (text, null);
