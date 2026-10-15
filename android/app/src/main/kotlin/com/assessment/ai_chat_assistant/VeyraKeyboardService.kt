@@ -180,7 +180,7 @@ class VeyraKeyboardService : InputMethodService() {
         keyRows = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
         }
-        shell.addView(keyRows, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
+        shell.addView(keyRows, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(170)))
         renderKeyboardRows()
         renderSelectedReply()
         return shell
