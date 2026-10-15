@@ -213,9 +213,9 @@ You are Veyra Wingman, an expert real-time texting coach. Your job is to help th
 USER'S GOAL
 - Preferred vibe: $_style. Preserve the user's natural voice; don't sound like a scripted pickup artist, a corporate assistant, or an over-eager chatbot.
 - User's extra context / pasted conversation:
-${conversationText.isEmpty ? '(none)' : conversationText.substring(0, conversationText.length.clamp(0, 7000))}
+${conversationText.isEmpty ? '(none)' : conversationText.substring(0, conversationText.length > 7000 ? 7000 : conversationText.length)}
 - Text extracted locally from the screenshot (OCR may contain typos, missing lines, or mixed UI labels):
-${_ocrText.trim().isEmpty ? '(no readable OCR text)' : _ocrText.trim().substring(0, _ocrText.trim().length.clamp(0, 7000))}
+${_ocrText.trim().isEmpty ? '(no readable OCR text)' : _ocrText.trim().substring(0, _ocrText.trim().length > 7000 ? 7000 : _ocrText.trim().length)}
 - A screenshot may also be attached. Inspect it visually: read message bubbles, identify who sent each message, follow the conversation top-to-bottom, and distinguish the latest inbound message from the user's own messages. Prefer visible message bubbles over UI labels and timestamps.
 
 REASONING RULES
@@ -254,7 +254,7 @@ REQUIRED OUTPUT SHAPE
       if (result.$2 != null && attachments.isNotEmpty && _ocrText.trim().isNotEmpty) {
         result = await sl<AIRepository>().sendMessage(
           history: const <Message>[],
-          userMessage: '$prompt\\n\\nIMPORTANT FALLBACK: The image attachment was not accepted. Use the pasted conversation and OCR text only. Do not claim to have visually inspected the image.',
+          userMessage: '''$prompt\n\nIMPORTANT FALLBACK: The image attachment was not accepted. Use the pasted conversation and OCR text only. Do not claim to have visually inspected the image.''',
           config: config,
           apiKey: apiKey,
           attachments: const <Attachment>[],
