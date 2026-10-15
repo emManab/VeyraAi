@@ -67,6 +67,8 @@ class _HomeScreenState extends State<HomeScreen> {
               _buildHeader(context, isDark),
               const SizedBox(height: AppSpacing.xl),
               _buildGreetingCard(context, isDark),
+              const SizedBox(height: AppSpacing.lg),
+              _buildWingmanCard(context, isDark),
               const SizedBox(height: AppSpacing.xl),
               _buildInputBar(context, isDark),
               const SizedBox(height: AppSpacing.xxl),
@@ -201,6 +203,52 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     ).animate().fadeIn(delay: 100.ms, duration: 400.ms).scale(begin: const Offset(0.95, 0.95));
+  }
+
+  Widget _buildWingmanCard(BuildContext context, bool isDark) {
+    return InkWell(
+      onTap: () => context.push('/wingman'),
+      borderRadius: AppRadius.cardRadius,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF24113D), Color(0xFF6232A5), Color(0xFF9064D9)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: AppRadius.cardRadius,
+          boxShadow: AppShadows.card,
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(13),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.13),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: const Icon(Icons.auto_awesome, color: Colors.white, size: 28),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text('VEYRA WINGMAN', style: TextStyle(color: Colors.white70, fontSize: 10, letterSpacing: 1.5, fontWeight: FontWeight.w800)),
+                  SizedBox(height: 5),
+                  Text('What should you text next?', style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w800)),
+                  SizedBox(height: 4),
+                  Text('Analyze a screenshot. Get three replies.', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+          ],
+        ),
+      ),
+    ).animate().fadeIn(delay: 150.ms).slideY(begin: 0.08, end: 0);
   }
 
   Widget _buildInputBar(BuildContext context, bool isDark) {
