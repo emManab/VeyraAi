@@ -72,6 +72,7 @@ class VeyraKeyboardService : InputMethodService() {
         addKeyRow(shell, listOf("a","s","d","f","g","h","j","k","l"))
         addKeyRow(shell, listOf("⇧","z","x","c","v","b","n","m","⌫"))
         val bottom = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        bottom.addView(keyButton("🌐", weight = .8f) { switchToNextInputMethod(false) })
         bottom.addView(keyButton("?123", weight = 1f) { commit("123") })
         bottom.addView(keyButton(",", weight = .7f) { commit(",") })
         bottom.addView(keyButton("English · V", weight = 3.4f) { commit(" ") })
