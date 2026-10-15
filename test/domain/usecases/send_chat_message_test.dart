@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:ai_chat_assistant/domain/entities/ai_provider_config.dart';
+import 'package:ai_chat_assistant/domain/entities/conversation.dart';
 import 'package:ai_chat_assistant/domain/entities/message.dart';
 import 'package:ai_chat_assistant/domain/repositories/ai_repository.dart';
 import 'package:ai_chat_assistant/domain/repositories/conversation_repository.dart';
@@ -40,6 +41,17 @@ void main() {
       final msg = invocation.positionalArguments.first as Message;
       return (msg, null);
     });
+
+    when(() => mockConvRepo.getConversation(any()))
+        .thenAnswer((_) async => (
+              Conversation(
+                id: 'c1',
+                title: 'Hello AI',
+                createdAt: DateTime.now(),
+                updatedAt: DateTime.now(),
+              ),
+              null,
+            ));
 
     when(() => mockConvRepo.updateConversationTitle(any(), any()))
         .thenAnswer((_) async => null);
@@ -82,6 +94,17 @@ void main() {
       final msg = invocation.positionalArguments.first as Message;
       return (msg, null);
     });
+
+    when(() => mockConvRepo.getConversation(any()))
+        .thenAnswer((_) async => (
+              Conversation(
+                id: 'c1',
+                title: 'Hello AI',
+                createdAt: DateTime.now(),
+                updatedAt: DateTime.now(),
+              ),
+              null,
+            ));
 
     when(() => mockConvRepo.updateConversationTitle(any(), any()))
         .thenAnswer((_) async => null);
