@@ -94,8 +94,12 @@ class MainActivity : FlutterActivity() {
         )
         if (!receiverRegistered) {
             val filter = IntentFilter(WingmanOverlayService.ACTION_CAPTURED)
-            if (Build.VERSION.SDK_INT >= 33) registerReceiver(captureReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
-            else @Suppress("DEPRECATION") registerReceiver(captureReceiver, filter)
+            if (Build.VERSION.SDK_INT >= 33) {
+                registerReceiver(captureReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+            } else {
+                @Suppress("DEPRECATION")
+                registerReceiver(captureReceiver, filter)
+            }
             receiverRegistered = true
         }
     }
