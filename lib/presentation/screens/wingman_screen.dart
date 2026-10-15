@@ -76,7 +76,14 @@ class _WingmanScreenState extends State<WingmanScreen> {
     setState(() => _error = null);
     try {
       final result = await _native.invokeMethod<bool>('startWingman');
-      if (result != true && mounted) setState(() => _error = 'Grant display-over-other-apps permission, then start Wingman again.');
+      if (mounted) {
+        setState(() {
+          _wingmanStarted = result == true;
+          if (!_wingmanStarted) {
+            _error = 'Grant display-over-other-apps permission, then start Wingman again.';
+          }
+        });
+      }
       await _syncOverlayStatus();
     } on PlatformException catch (e) {
       if (mounted) setState(() => _error = e.message ?? 'Could not start Wingman.');
@@ -91,7 +98,7 @@ class _WingmanScreenState extends State<WingmanScreen> {
         if (mounted) setState(() => _error = e.message ?? 'Could not stop Wingman.');
       }
     }
-    if (mounted) setState(() => _overlayEnabled = false);
+    if (mounted) setState(() => _wingmanStarted = false);
     await _syncOverlayStatus();
   }
 
@@ -121,7 +128,13 @@ class _WingmanScreenState extends State<WingmanScreen> {
         throw Exception('Add an API key for the selected provider in Settings before analyzing a conversation.');
       }
 
-      if (_imagePath != null && config.provider == AIProvider.veyraFree) {\n        throw Exception('Veyra Free is text-only. Select a vision-capable Gemini or OpenAI model in Settings to analyze screenshots, or paste the conversation as text.');\n      }\n\n      final attachments = _imagePath == null ? <Attachment>[] : [
+      if (_imagePath != null && config.provider == AIProvider.veyraFree) {
+        throw Exception(
+          'Veyra Free is text-only. Select a vision-capable Gemini or OpenAI model in Settings to analyze screenshots, or paste the conversation as text.',
+        );
+      }
+
+      final attachments = _imagePath == null ? <Attachment>[] : [
         Attachment(id: const Uuid().v4(), path: _imagePath!, type: AttachmentType.image, mimeType: 'image/jpeg', name: 'conversation_screenshot.jpg'),
       ];
       final prompt = '''
