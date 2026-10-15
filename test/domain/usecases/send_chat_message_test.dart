@@ -54,7 +54,7 @@ void main() {
               null,
             ));
 
-    when(() => mockConvRepo.updateConversationTitle(any(), any()))
+    when(() => mockConvRepo.updateConversationTitle(any(), any(), isManuallySet: false))
         .thenAnswer((_) async => null);
 
     when(() => mockAiRepo.sendMessage(
@@ -109,7 +109,7 @@ void main() {
               null,
             ));
 
-    when(() => mockConvRepo.updateConversationTitle(any(), any()))
+    when(() => mockConvRepo.updateConversationTitle(any(), any(), isManuallySet: false))
         .thenAnswer((_) async => null);
 
     when(() => mockAiRepo.sendMessage(
