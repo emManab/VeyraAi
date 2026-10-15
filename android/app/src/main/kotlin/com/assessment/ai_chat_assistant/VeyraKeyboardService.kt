@@ -40,6 +40,7 @@ class VeyraKeyboardService : InputMethodService() {
     private val handler = Handler(Looper.getMainLooper())
 
     private var root: LinearLayout? = null
+    private var aiPanel: LinearLayout? = null
     private var conversationText = ""
     private var shifted = false
     private var symbolsMode = false
@@ -74,6 +75,35 @@ class VeyraKeyboardService : InputMethodService() {
         }
         root = shell
 
+        // Keep the standard keyboard compact; AI controls expand only on demand.
+        val compactToolbar = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(2), 0, dp(2), dp(3))
+        }
+        compactToolbar.addView(TextView(this).apply {
+            text = "Veyra"
+            textSize = 15f
+            setTextColor(ink)
+            setTypeface(typeface, Typeface.BOLD)
+        }, LinearLayout.LayoutParams(0, dp(36), 1f))
+        compactToolbar.addView(TextView(this).apply {
+            text = "✨"
+            textSize = 20f
+            gravity = Gravity.CENTER
+            setTextColor(white)
+            background = rounded(purple, 14)
+            setOnClickListener { toggleAiPanel() }
+        }, LinearLayout.LayoutParams(dp(44), dp(36)))
+        shell.addView(compactToolbar)
+
+        aiPanel = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            visibility = View.GONE
+            background = rounded(Color.rgb(248, 246, 252), 16)
+            setPadding(dp(5), dp(5), dp(5), dp(5))
+        }
+
         // Toolbar, sized for thumb-friendly use.
         val toolbar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -101,7 +131,7 @@ class VeyraKeyboardService : InputMethodService() {
         toolbar.addView(brand, LinearLayout.LayoutParams(0, dp(38), 1f))
         toolbar.addView(topAction("Paste chat", false) { pasteClipboard() })
         toolbar.addView(topAction("Analyze", true) { analyzeConversation() })
-        shell.addView(toolbar)
+        aiPanel!!.addView(toolbar)
 
         conversationPreview = TextView(this).apply {
             text = "Copy recent messages, then tap Paste chat."
@@ -114,7 +144,7 @@ class VeyraKeyboardService : InputMethodService() {
         }
         val previewParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(32))
         previewParams.topMargin = dp(4)
-        shell.addView(conversationPreview, previewParams)
+        aiPanel!!.addView(conversationPreview, previewParams)
 
         val replyHeader = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -132,7 +162,7 @@ class VeyraKeyboardService : InputMethodService() {
             visibility = View.GONE
         }
         replyHeader.addView(progress, LinearLayout.LayoutParams(dp(18), dp(18)))
-        shell.addView(replyHeader)
+        aiPanel!!.addView(replyHeader)
 
         val categoryScroll = HorizontalScrollView(this).apply {
             isHorizontalScrollBarEnabled = false
@@ -145,7 +175,7 @@ class VeyraKeyboardService : InputMethodService() {
         categoryScroll.addView(categoryRow)
         val categoryParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(38))
         categoryParams.bottomMargin = dp(4)
-        shell.addView(categoryScroll, categoryParams)
+        aiPanel!!.addView(categoryScroll, categoryParams)
         renderCategories()
 
         replyCard = LinearLayout(this).apply {
@@ -175,7 +205,8 @@ class VeyraKeyboardService : InputMethodService() {
         replyCard!!.addView(insertButton, LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp(40)))
         val replyParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(60))
         replyParams.bottomMargin = dp(5)
-        shell.addView(replyCard, replyParams)
+        aiPanel!!.addView(replyCard, replyParams)
+        shell.addView(aiPanel, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
 
         keyRows = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -231,6 +262,11 @@ class VeyraKeyboardService : InputMethodService() {
         } catch (error: Exception) {
             updateStatus("AI engine could not start. Reopen Veyra Keyboard.", error = true)
         }
+    }
+
+    private fun toggleAiPanel() {
+        val panel = aiPanel ?: return
+        panel.visibility = if (panel.visibility == View.VISIBLE) View.GONE else View.VISIBLE
     }
 
     private fun pasteClipboard() {
@@ -417,7 +453,7 @@ class VeyraKeyboardService : InputMethodService() {
             listOf(
                 listOf("1","2","3","4","5","6","7","8","9","0"),
                 listOf("@","#","$","%","&","-","+","(",")","/"),
-                listOf("=<>","*","\"",'",":",";","!","?","DELETE"),
+                listOf("=<>","*","\\\"","'",":",";","!","?","DELETE"),
             )
         }
         rows.forEachIndexed { index, labels ->
