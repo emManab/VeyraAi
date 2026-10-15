@@ -2,10 +2,8 @@ package com.assessment.ai_chat_assistant
 
 import android.app.Activity
 import android.app.AppOpsManager
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.media.projection.MediaProjectionManager
 import android.net.Uri
 import android.os.Build
@@ -25,25 +23,7 @@ class MainActivity : FlutterActivity() {
     private var eventSink: EventChannel.EventSink? = null
     private var pendingCapturePath: String? = null
     private var pendingOcrText: String = ""
-    private var receiverRegistered = false
 
-    private val captureReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent?.action != WingmanOverlayService.ACTION_CAPTURED) return
-            val path = intent.getStringExtra(WingmanOverlayService.EXTRA_PATH).orEmpty()
-            if (path.isBlank()) {
-                eventSink?.error("CAPTURE_NOT_READY", "Screen capture is not ready. Stop Wingman and start it again, approving screen capture.", null)
-                return
-            }
-            val ocrText = intent.getStringExtra("ocr_text").orEmpty()
-            val payload = mapOf("type" to "capture", "path" to path, "ocrText" to ocrText)
-            if (eventSink == null) {
-                pendingCapturePath = path
-                pendingOcrText = ocrText
-            }
-            eventSink?.success(payload)
-        }
-    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -99,16 +79,32 @@ class MainActivity : FlutterActivity() {
                 }
             }
         )
-        if (!receiverRegistered) {
-            val filter = IntentFilter(WingmanOverlayService.ACTION_CAPTURED)
-            if (Build.VERSION.SDK_INT >= 33) {
-                registerReceiver(captureReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
-            } else {
-                @Suppress("DEPRECATION")
-                registerReceiver(captureReceiver, filter)
-            }
-            receiverRegistered = true
+    }
+
+    private fun cacheCaptureIntent(intent: Intent?) {
+        val path = intent?.getStringExtra("wingman_capture_path").orEmpty()
+        if (path.isBlank()) return
+        val ocrText = intent?.getStringExtra("wingman_ocr_text").orEmpty()
+        val payload = mapOf("type" to "capture", "path" to path, "ocrText" to ocrText)
+        if (eventSink == null) {
+            pendingCapturePath = path
+            pendingOcrText = ocrText
+        } else {
+            eventSink?.success(payload)
         }
+        intent?.removeExtra("wingman_capture_path")
+        intent?.removeExtra("wingman_ocr_text")
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        cacheCaptureIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        cacheCaptureIntent(intent)
     }
 
     private fun hasUsageAccess(): Boolean {
@@ -143,11 +139,4 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    override fun onDestroy() {
-        if (receiverRegistered) {
-            try { unregisterReceiver(captureReceiver) } catch (_: Throwable) { }
-            receiverRegistered = false
-        }
-        super.onDestroy()
-    }
 }
