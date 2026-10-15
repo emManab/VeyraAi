@@ -95,7 +95,7 @@ class WingmanOverlayService : Service() {
             try {
                 val target = foregroundTargetPackage()
                 currentTarget = target
-                if (target != null && Settings.canDrawOverlays(this@WingmanOverlayService)) {
+                if (target != null && canDrawOverlays()) {
                     if (replies.isNotEmpty()) showSuggestionsPanel() else showBubble()
                 } else {
                     hideOverlayViews()
@@ -150,7 +150,13 @@ class WingmanOverlayService : Service() {
             this, 7012, launchIntent ?: Intent(this, MainActivity::class.java),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        val notification = Notification.Builder(this, CHANNEL_ID)
+        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notification.Builder(this, CHANNEL_ID)
+        } else {
+            @Suppress("DEPRECATION")
+            Notification.Builder(this)
+        }
+        val notification = builder
             .setContentTitle("Veyra Wingman is active")
             .setContentText("A floating bubble appears in supported chat apps. Tap it to analyze a screenshot.")
             .setSmallIcon(android.R.drawable.ic_menu_info_details)
@@ -264,7 +270,7 @@ class WingmanOverlayService : Service() {
     }
 
     private fun showBubble() {
-        if (bubble != null || !Settings.canDrawOverlays(this)) return
+        if (bubble != null || !canDrawOverlays()) return
         val button = TextView(this).apply {
             text = "V"
             textSize = 22f
@@ -425,6 +431,9 @@ class WingmanOverlayService : Service() {
         panelParams = null
         overlayAdded = false
     }
+
+    private fun canDrawOverlays(): Boolean =
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(this)
 
     private fun rounded(color: Int, radius: Int): GradientDrawable =
         GradientDrawable().apply { setColor(color); cornerRadius = dp(radius).toFloat() }
