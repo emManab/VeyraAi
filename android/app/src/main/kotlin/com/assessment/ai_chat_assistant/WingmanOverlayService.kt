@@ -128,10 +128,15 @@ class WingmanOverlayService : Service() {
                 return START_NOT_STICKY
             }
             ACTION_SHOW_SUGGESTIONS -> {
+                // A MediaProjection session cannot be silently recreated after Android kills it.
+                if (projection == null) {
+                    stopSelf()
+                    return START_NOT_STICKY
+                }
                 replies = intent.getStringArrayListExtra(EXTRA_REPLIES) ?: emptyList()
                 reasons = intent.getStringArrayListExtra(EXTRA_REASONS) ?: emptyList()
                 if (currentTarget != null) showSuggestionsPanel()
-                return START_STICKY
+                return START_NOT_STICKY
             }
         }
 
@@ -145,7 +150,7 @@ class WingmanOverlayService : Service() {
         if (resultCode != 0 && resultData != null && projection == null) {
             startProjection(resultCode, resultData)
         }
-        return START_STICKY
+        return START_NOT_STICKY
     }
 
     private fun startForegroundSafely() {
