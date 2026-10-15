@@ -13,6 +13,7 @@ import android.graphics.Bitmap
 import android.graphics.PixelFormat
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
+import android.net.Uri
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.media.Image
@@ -35,6 +36,9 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import android.content.pm.ServiceInfo
 import java.io.File
 import java.io.FileOutputStream
@@ -232,16 +236,33 @@ class WingmanOverlayService : Service() {
             padded.recycle()
             bitmap.recycle()
             lastCaptureAt = System.currentTimeMillis()
-            val event = Intent(ACTION_CAPTURED).setPackage(packageName)
-                .putExtra(EXTRA_PATH, file.absolutePath)
-            sendBroadcast(event)
-            val launch = packageManager.getLaunchIntentForPackage(packageName)
-            if (launch != null) {
-                launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                startActivity(launch)
-            }
+            // OCR runs on-device. Only the extracted text is sent to the selected
+            // AI provider when Flutter starts analysis; the image remains in cache.
+            val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+            val input = InputImage.fromFilePath(this, Uri.fromFile(file))
+            recognizer.process(input)
+                .addOnSuccessListener { recognized ->
+                    recognizer.close()
+                    deliverCapture(file.absolutePath, recognized.text)
+                }
+                .addOnFailureListener {
+                    recognizer.close()
+                    deliverCapture(file.absolutePath, "")
+                }
         } catch (_: Throwable) {
             captureRequested.set(false)
+        }
+    }
+
+    private fun deliverCapture(path: String, recognizedText: String) {
+        val event = Intent(ACTION_CAPTURED).setPackage(packageName)
+            .putExtra(EXTRA_PATH, path)
+            .putExtra("ocr_text", recognizedText)
+        sendBroadcast(event)
+        val launch = packageManager.getLaunchIntentForPackage(packageName)
+        if (launch != null) {
+            launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            startActivity(launch)
         }
     }
 
