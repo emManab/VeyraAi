@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.AppOpsManager
 import android.content.Context
 import android.content.Intent
-import android.content.Context
 import android.view.inputmethod.InputMethodManager
 import org.json.JSONArray
 import android.media.projection.MediaProjectionManager
@@ -49,6 +48,10 @@ class MainActivity : FlutterActivity() {
                     result.success(true)
                 }
                 "openKeyboardSettings" -> {
+                    startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
+                    result.success(true)
+                }
+                "showKeyboardPicker" -> {
                     (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showInputMethodPicker()
                     result.success(true)
                 }
@@ -128,8 +131,12 @@ class MainActivity : FlutterActivity() {
         val keyboardText = intent.getStringExtra("wingman_keyboard_text")
         if (!keyboardText.isNullOrBlank()) {
             pendingKeyboardText = keyboardText
-            MethodChannel(flutterEngine!!.dartExecutor.binaryMessenger, channelName)
-                .invokeMethod("keyboardRequest", keyboardText)
+            flutterEngine?.dartExecutor?.binaryMessenger?.let { messenger ->
+                MethodChannel(messenger, channelName).invokeMethod("keyboardRequest", keyboardText)
+                // onNewIntent is delivered to an already-running Activity; Dart's
+                // handler is installed for that live engine, so avoid duplicate consumption.
+                pendingKeyboardText = null
+            }
             intent.removeExtra("wingman_keyboard_text")
         }
     }
