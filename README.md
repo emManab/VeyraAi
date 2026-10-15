@@ -71,7 +71,7 @@ Currently unlicensed.
 
 ## Veyra Wingman
 
-On Android, Wingman can run as an explicitly started foreground service. After the user grants display-over-other-apps, Usage Access, and Android screen-capture consent, a draggable V bubble appears over supported apps: WhatsApp, WhatsApp Business, Instagram, Tinder, Bumble, and Hinge.
+On Android, Wingman can run as an explicitly started foreground service. After the user grants display-over-other-apps, Usage Access, and Android screen-capture consent, a draggable V bubble appears over supported apps: WhatsApp, WhatsApp Business, Instagram, Tinder, Bumble, Hinge, Messenger, Telegram, Signal, Snapchat, Discord, Google Messages, Viber, LINE, WeChat, and Skype.
 
 ### How the live workflow works
 
@@ -88,6 +88,6 @@ On Android, Wingman can run as an explicitly started foreground service. After t
 - **User-triggered capture only:** Veyra does not continuously record or automatically capture chats. Screen capture requires Android's consent dialog for each session.
 - **On-device OCR:** OCR runs locally. Recognized text is sent to the configured AI provider when analysis starts. A configured vision-capable provider also receives the screenshot; the text-only Veyra Free provider receives OCR text, not the image.
 - **Protected content:** Android apps that mark their screen as secure may appear black in captures. Veyra does not bypass protected-content restrictions.
-- **Supported package IDs:** `com.whatsapp`, `com.whatsapp.w4b`, `com.instagram.android`, `com.tinder`, `com.bumble.app`, and `co.hinge.app`. App package IDs can vary by region or app version.
+- **Supported package IDs:** `com.whatsapp`, `com.whatsapp.w4b`, `com.instagram.android`, `com.tinder`, `com.bumble.app`, `co.hinge.app`, `com.facebook.orca`, `org.telegram.messenger`, `org.thoughtcrime.securesms`, `com.snapchat.android`, `com.discord`, `com.google.android.apps.messaging`, `com.viber.voip`, `jp.naver.line.android`, `com.tencent.mm`, and `com.skype.raider`. App package IDs can vary by region or app version.
 - Screenshots are not stored in analysis history; captured images are temporary files in the app cache. Local analysis history stores recognized text and suggested replies and can be cleared in Wingman.
 - Suggestions are drafts. Veyra never sends a message automatically.
