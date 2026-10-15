@@ -1,6 +1,5 @@
 package com.assessment.ai_chat_assistant
 
-import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
@@ -8,13 +7,11 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.inputmethodservice.InputMethodService
-import android.os.Build
 import android.view.Gravity
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.LinearLayout
-import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import org.json.JSONArray
@@ -120,7 +117,7 @@ class VeyraKeyboardService : InputMethodService() {
             .getString("replies_json", "[]") ?: "[]"
         val items = try {
             val array = JSONArray(json)
-            (0 until array.length()).mapNotNull { array.optString(it).takeIf(String::isNotBlank) }.take(3)
+            (0 until array.length()).mapNotNull { array.optString(it).takeIf { value -> value.isNotBlank() } }.take(3)
         } catch (_: Exception) { emptyList() }
         if (items.isEmpty()) {
             host.addView(TextView(this).apply {
