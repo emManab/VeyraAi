@@ -197,7 +197,10 @@ class _WingmanScreenState extends State<WingmanScreen> {
         throw Exception('Add an API key for the selected provider in Settings before analyzing a conversation.');
       }
 
-      if (_imagePath != null && config.provider == AIProvider.veyraFree && _ocrText.trim().isEmpty) {
+      if (_imagePath != null &&
+          config.provider == AIProvider.veyraFree &&
+          _ocrText.trim().isEmpty &&
+          _contextController.text.trim().isEmpty) {
         throw Exception(
           'No readable text was extracted from this screenshot. Try a clearer capture, paste the conversation, or select a vision-capable Gemini/OpenAI model in Settings.',
         );
@@ -217,6 +220,7 @@ ${conversationText.isEmpty ? '(none)' : conversationText.substring(0, conversati
 - Text extracted locally from the screenshot (OCR may contain typos, missing lines, or mixed UI labels):
 ${_ocrText.trim().isEmpty ? '(no readable OCR text)' : _ocrText.trim().substring(0, _ocrText.trim().length > 7000 ? 7000 : _ocrText.trim().length)}
 - A screenshot may also be attached. Inspect it visually: read message bubbles, identify who sent each message, follow the conversation top-to-bottom, and distinguish the latest inbound message from the user's own messages. Prefer visible message bubbles over UI labels and timestamps.
+- OCR may include hints like [y=123, side=RIGHT] or [y=456, side=LEFT_OR_CENTER]. Use y for approximate reading order and side only as a weak clue to bubble ownership; app layouts differ, so never infer the speaker from position alone.
 
 REASONING RULES
 1. Reconstruct the last several turns and identify the latest message from the OTHER person that needs a response. If speaker identity is unclear, say so in context_summary rather than pretending.
