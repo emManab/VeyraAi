@@ -81,6 +81,8 @@ class WingmanOverlayService : Service() {
     private var bubbleParams: WindowManager.LayoutParams? = null
     private var panelParams: WindowManager.LayoutParams? = null
     private var currentTarget: String? = null
+    private var currentForegroundPackage: String? = null
+    private var lastUsageQueryTime = System.currentTimeMillis() - 86_400_000L
     private var captureRequested = AtomicBoolean(false)
     private var replies: List<String> = emptyList()
     private var reasons: List<String> = emptyList()
@@ -240,10 +242,11 @@ class WingmanOverlayService : Service() {
     private fun foregroundTargetPackage(): String? {
         val usage = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
         val now = System.currentTimeMillis()
-        val events = usage.queryEvents(now - 12_000L, now)
+        // Query the whole day once to establish the current foreground app, then
+        // overlap the last few seconds so lifecycle events aren't lost between polls.
+        val begin = if (lastUsageQueryTime < now - 80_000L) now - 86_400_000L else now - 5_000L
+        val events = usage.queryEvents(begin, now)
         val event = UsageEvents.Event()
-        var latestPackage: String? = null
-        var latestTime = 0L
         while (events.hasNextEvent()) {
             events.getNextEvent(event)
             val resumed = if (Build.VERSION.SDK_INT >= 29) {
@@ -252,12 +255,12 @@ class WingmanOverlayService : Service() {
                 @Suppress("DEPRECATION")
                 event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND
             }
-            if (resumed && event.timeStamp >= latestTime) {
-                latestTime = event.timeStamp
-                latestPackage = event.packageName
+            if (resumed) {
+                currentForegroundPackage = event.packageName
             }
         }
-        return latestPackage?.takeIf { it in supportedPackages && now - latestTime < 12_000L }
+        lastUsageQueryTime = now
+        return currentForegroundPackage?.takeIf { it in supportedPackages }
     }
 
     private fun showBubble() {
