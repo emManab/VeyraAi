@@ -71,23 +71,37 @@ Currently unlicensed.
 
 ## Veyra Wingman
 
-On Android, Wingman can run as an explicitly started foreground service. After the user grants display-over-other-apps, Usage Access, and Android screen-capture consent, a draggable V bubble appears over supported apps: WhatsApp, WhatsApp Business, Instagram, Tinder, Bumble, Hinge, Messenger, Telegram, Signal, Snapchat, Discord, Google Messages, Viber, LINE, WeChat, and Skype.
+Veyra Wingman is an Android-first texting coach. It offers a user-triggered floating bubble for screen analysis and a custom keyboard fallback for apps that block screenshots.
 
-### How the live workflow works
+### Screenshot workflow
 
 1. Open Veyra AI → Wingman → **Start Wingman**.
-2. Grant the three Android permissions when prompted. Return to Wingman and tap Start again after returning from the overlay or Usage Access settings.
-3. Open a supported chat app. The floating **V** bubble appears while that app is foregrounded.
-4. Tap the bubble to capture the current screen. Capture is user-triggered; the bubble is removed briefly so it does not cover the conversation.
-5. On-device ML Kit OCR extracts readable text from the screenshot. Veyra opens its analysis screen and sends the recognized text to the selected AI provider. If a vision-capable Gemini or OpenAI-compatible model is configured, the screenshot is also attached for image understanding.
-6. After suggestions are generated, return to the supported chat app to see the floating reply panel. Tap a suggestion to copy it, then review and send it yourself.
+2. Grant display-over-other-apps, Usage Access, and Android's screen-capture consent.
+3. Open a supported messaging or dating app and tap the floating **V** bubble.
+4. Veyra captures one frame, runs OCR locally, and preserves reading order plus approximate left/right text positions. When a vision-capable Gemini or OpenAI-compatible model is selected, the screenshot is also sent with the OCR text.
+5. Veyra generates three concise, context-aware next-message options. Review and copy the one you want; Veyra never sends messages automatically.
 
-### Platform scope, privacy, and limits
+### Veyra Keyboard fallback
 
-- **Android only for the live bubble:** cross-app overlays and MediaProjection capture are not available on iOS. On other platforms, import a screenshot manually.
-- **User-triggered capture only:** Veyra does not continuously record or automatically capture chats. Screen capture requires Android's consent dialog for each session.
-- **On-device OCR:** OCR runs locally. Recognized text is sent to the configured AI provider when analysis starts. A configured vision-capable provider also receives the screenshot; the text-only Veyra Free provider receives OCR text, not the image.
-- **Protected content:** Android apps that mark their screen as secure may appear black in captures. Veyra does not bypass protected-content restrictions.
-- **Supported package IDs:** `com.whatsapp`, `com.whatsapp.w4b`, `com.instagram.android`, `com.tinder`, `com.bumble.app`, `co.hinge.app`, `com.facebook.orca`, `org.telegram.messenger`, `org.thoughtcrime.securesms`, `com.snapchat.android`, `com.discord`, `com.google.android.apps.messaging`, `com.viber.voip`, `jp.naver.line.android`, `com.tencent.mm`, and `com.skype.raider`. App package IDs can vary by region or app version.
-- Screenshots are not stored in analysis history; captured images are temporary files in the app cache. Local analysis history stores recognized text and suggested replies and can be cleared in Wingman.
-- Suggestions are drafts. Veyra never sends a message automatically.
+Some apps use protected screens or otherwise block screenshots. For those apps:
+
+1. Copy the last few messages from the conversation (include who said each message if possible).
+2. In Wingman, tap **Enable keyboard** and enable **Veyra Keyboard** in Android settings. Then tap **Select keyboard** and choose Veyra Keyboard.
+3. Return to the chat, switch to Veyra Keyboard, and tap **Paste chat → Analyze**.
+4. Veyra opens its analysis screen and automatically analyzes the selected text using the configured provider. Return to the chat and open Veyra Keyboard again; up to three suggestions will appear. Tap one to insert it into the focused message field, then review and send it yourself.
+
+The keyboard's compact QWERTY keys support ordinary typing, delete, shift, space, and enter. The keyboard only reads clipboard content after the user taps **Paste chat**. It does not scrape the current app's message field or capture screens in the background. Selected conversation text is sent to the configured AI provider when **Analyze** is tapped.
+
+### Improving reply quality
+
+- For screenshot understanding, configure a vision-capable Gemini or OpenAI-compatible model in Settings. Text-only models use OCR and pasted conversation text; a retry without the image is attempted if a vision endpoint rejects the attachment.
+- The prompt reconstructs recent turns, identifies the latest inbound message, mirrors the conversation language (including Hinglish), generates distinct concise options, and asks the model to acknowledge uncertainty rather than invent missing context.
+- For best results, copy the last 4–10 messages with speaker labels, for example `Them: ... / Me: ... / Them: ...`.
+
+### Platform scope and privacy
+
+- The floating overlay, MediaProjection capture, and custom keyboard are Android-only. On iOS and other platforms, import a screenshot or paste conversation text in Wingman.
+- Screen capture is explicitly user-triggered and requires Android's consent. Apps that mark content secure may appear black; Veyra does not bypass protected-content restrictions.
+- OCR runs on-device. Recognized text is sent to the configured AI provider when analysis starts. A configured vision-capable provider also receives the screenshot. The text-only Veyra Free provider receives text, not the image.
+- Screenshots are temporary files in app cache; they are not stored in analysis history. Local history stores recognized text and suggested replies and can be cleared in Wingman.
+- Supported app detection is based on package IDs and may vary by app version or region. Veyra does not auto-send messages.
