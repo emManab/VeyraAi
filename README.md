@@ -71,13 +71,23 @@ Currently unlicensed.
 
 ## Veyra Wingman
 
-The Wingman screen is available from the home dashboard. It supports importing a screenshot from the device gallery or pasting conversation context, choosing a reply tone, and generating three contextual message suggestions through the selected Veyra AI provider. Replies can be edited and copied; Veyra does not send messages automatically. Analysis history is stored locally in the existing Hive `app_settings` box and can be cleared from the Wingman screen.
+On Android, Wingman can run as an explicitly started foreground service. After the user grants display-over-other-apps, Usage Access, and Android screen-capture consent, a draggable V bubble appears over supported apps: WhatsApp, WhatsApp Business, Instagram, Tinder, Bumble, and Hinge.
 
-### Platform scope and privacy
+### How the live workflow works
 
-- **Android:** the current native bridge can open Android's display-over-other-apps permission settings. The draggable cross-app overlay and MediaProjection screenshot capture service are not implemented yet. Use screenshot import to run analysis.
-- **iOS and other Flutter targets:** import a screenshot from Photos/Gallery; arbitrary cross-app overlays and unrestricted background screenshots are not supported.
-- **Vision models:** Veyra Free is text-only. Screenshot analysis requires a configured Gemini or OpenAI-compatible model that supports image input. Veyra passes the selected screenshot to that provider only after the user taps Analyze.
-- Screenshots are not stored in analysis history. History stores the recognized message, summary, reply suggestions, and tone locally. The user can clear this history from the Wingman screen.
+1. Open Veyra AI → Wingman → **Start Wingman**.
+2. Grant the three Android permissions when prompted. Return to Wingman and tap Start again after returning from the overlay or Usage Access settings.
+3. Open a supported chat app. The floating **V** bubble appears while that app is foregrounded.
+4. Tap the bubble to capture the current screen. Capture is user-triggered; the bubble is removed briefly so it does not cover the conversation.
+5. On-device ML Kit OCR extracts readable text from the screenshot. Veyra opens its analysis screen and sends the recognized text to the selected AI provider. If a vision-capable Gemini or OpenAI-compatible model is configured, the screenshot is also attached for image understanding.
+6. After suggestions are generated, return to the supported chat app to see the floating reply panel. Tap a suggestion to copy it, then review and send it yourself.
+
+### Platform scope, privacy, and limits
+
+- **Android only for the live bubble:** cross-app overlays and MediaProjection capture are not available on iOS. On other platforms, import a screenshot manually.
+- **User-triggered capture only:** Veyra does not continuously record or automatically capture chats. Screen capture requires Android's consent dialog for each session.
+- **On-device OCR:** OCR runs locally. Recognized text is sent to the configured AI provider when analysis starts. A configured vision-capable provider also receives the screenshot; the text-only Veyra Free provider receives OCR text, not the image.
+- **Protected content:** Android apps that mark their screen as secure may appear black in captures. Veyra does not bypass protected-content restrictions.
+- **Supported package IDs:** `com.whatsapp`, `com.whatsapp.w4b`, `com.instagram.android`, `com.tinder`, `com.bumble.app`, and `co.hinge.app`. App package IDs can vary by region or app version.
+- Screenshots are not stored in analysis history; captured images are temporary files in the app cache. Local analysis history stores recognized text and suggested replies and can be cleared in Wingman.
 - Suggestions are drafts. Veyra never sends a message automatically.
-
