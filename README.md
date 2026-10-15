@@ -88,9 +88,9 @@ Some apps use protected screens or otherwise block screenshots. For those apps:
 1. Copy the last few messages from the conversation (include who said each message if possible).
 2. In Wingman, tap **Enable keyboard** and enable **Veyra Keyboard** in Android settings. Then tap **Select keyboard** and choose Veyra Keyboard.
 3. Return to the chat, switch to Veyra Keyboard, and tap **Paste chat → Analyze**.
-4. Veyra opens its analysis screen and automatically analyzes the selected text using the configured provider. Return to the chat and open Veyra Keyboard again; up to three suggestions will appear. Tap one to insert it into the focused message field, then review and send it yourself.
+4. **Stay in the same chat app.** Analyze runs inside the keyboard's background Flutter engine; it does not open the Veyra app. A row of categories (Best, Playful, Flirty, Funny, Casual, Confident, Romantic) appears above the keys. Tap a category to preview that reply, then tap **Insert** to place it in the focused message field. Review and send it yourself.
 
-The keyboard's compact QWERTY keys support ordinary typing, delete, shift, space, and enter. The keyboard only reads clipboard content after the user taps **Paste chat**. It does not scrape the current app's message field or capture screens in the background. Selected conversation text is sent to the configured AI provider when **Analyze** is tapped.
+The keyboard uses a larger, Gboard-inspired QWERTY layout with comfortable key targets, shift, backspace (long-press deletes more), symbols, punctuation, space, enter, and a keyboard-switch key. The keyboard only reads clipboard content after the user taps **Paste chat**. It does not scrape the current app's message field or capture screens in the background. Selected conversation text is sent to the configured AI provider when **Analyze** is tapped. Analysis runs in a dedicated background Flutter engine that reads the saved provider and API key from secure storage without opening the main app or its Hive history database.
 
 ### Improving reply quality
 
