@@ -233,7 +233,7 @@ Give three distinct, concise, human-sounding replies. If context is missing or u
             const SizedBox(height: 16),
             Text('What vibe do you want?', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
             const SizedBox(height: 10),
-            Wrap(spacing: 8, runSpacing: 8, children: _styles.map((style) => ChoiceChip(label: Text(style), selected: _style == style, onSelected: (_) => setState(() => _style = style)).animateIn()).toList()),
+            Wrap(spacing: 8, runSpacing: 8, children: _styles.map((style) => ChoiceChip(label: Text(style), selected: _style == style, onSelected: (_) => setState(() => _style = style))).toList()),
             const SizedBox(height: 16),
             TextField(controller: _contextController, minLines: 2, maxLines: 4, decoration: const InputDecoration(labelText: 'Optional context or your draft', hintText: 'Paste recent messages or explain what you want to say…', border: OutlineInputBorder())),
             const SizedBox(height: 14),
