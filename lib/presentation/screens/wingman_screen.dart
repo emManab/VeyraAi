@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
@@ -33,7 +32,7 @@ class _WingmanScreenState extends State<WingmanScreen> {
   String? _imagePath;
   String? _error;
   bool _busy = false;
-  bool _overlayEnabled = false;
+  bool _overlayPermissionGranted = false;\n  bool _wingmanStarted = false;
   List<_Reply> _replies = [];
   String _recognized = '';
   String _summary = '';
@@ -62,7 +61,7 @@ class _WingmanScreenState extends State<WingmanScreen> {
     if (!Platform.isAndroid) return;
     try {
       final value = await _native.invokeMethod<bool>('isOverlayEnabled') ?? false;
-      if (mounted) setState(() => _overlayEnabled = value);
+      if (mounted) setState(() => _overlayPermissionGranted = value);
     } on PlatformException catch (e) {
       if (mounted) setState(() => _error = e.message ?? 'Unable to check overlay permission.');
     }
@@ -308,12 +307,12 @@ Give three distinct, concise, human-sounding replies. If context is missing or u
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text('Floating assistant', style: TextStyle(color: foreground, fontWeight: FontWeight.w800)),
           const SizedBox(height: 3),
-          Text(Platform.isAndroid ? (_overlayEnabled ? 'Overlay permission enabled' : 'Android overlay setup') : 'Screenshot import on this platform', style: TextStyle(color: muted, fontSize: 12)),
+          Text(Platform.isAndroid ? (_wingmanStarted ? 'Permission ready · screenshot import mode' : (_overlayPermissionGranted ? 'Overlay permission granted' : 'Android overlay setup')) : 'Screenshot import on this platform', style: TextStyle(color: muted, fontSize: 12)),
         ])),
-        Icon(_overlayEnabled ? Icons.check_circle : Icons.info_outline, color: _overlayEnabled ? Colors.green : muted),
+        Icon(_overlayPermissionGranted ? Icons.check_circle : Icons.info_outline, color: _overlayPermissionGranted ? Colors.green : muted),
       ]),
       const SizedBox(height: 14),
-      SizedBox(width: double.infinity, child: FilledButton.icon(onPressed: _overlayEnabled ? _stopWingman : _startWingman, icon: Icon(_overlayEnabled ? Icons.stop_circle_outlined : Icons.play_circle_outline), label: Text(_overlayEnabled ? 'Stop Wingman' : 'Start Wingman'))),
+      SizedBox(width: double.infinity, child: FilledButton.icon(onPressed: _wingmanStarted ? _stopWingman : _startWingman, icon: Icon(_wingmanStarted ? Icons.stop_circle_outlined : Icons.play_circle_outline), label: Text(_wingmanStarted ? 'Stop Wingman' : 'Start Wingman'))),
       if (Platform.isAndroid) Padding(padding: const EdgeInsets.only(top: 8), child: Text('Overlay permission is separate from screen-capture consent. This version provides screenshot import; native cross-app capture requires a MediaProjection session.', style: TextStyle(color: muted, fontSize: 12))),
     ]),
   );
