@@ -32,7 +32,8 @@ class _WingmanScreenState extends State<WingmanScreen> {
   String? _imagePath;
   String? _error;
   bool _busy = false;
-  bool _overlayPermissionGranted = false;\n  bool _wingmanStarted = false;
+  bool _overlayPermissionGranted = false;
+  bool _wingmanStarted = false;
   List<_Reply> _replies = [];
   String _recognized = '';
   String _summary = '';
