@@ -25,6 +25,7 @@ class VeyraKeyboardService : InputMethodService() {
     private val purple = Color.rgb(109, 53, 181)
     private var root: LinearLayout? = null
     private var clipboardText: String = ""
+    private var shifted: Boolean = false
     private var preview: TextView? = null
     private var suggestions: LinearLayout? = null
 
@@ -155,14 +156,41 @@ class VeyraKeyboardService : InputMethodService() {
             row.addView(keyButton(key, weight) {
                 when (key) {
                     "⌫" -> currentInputConnection?.deleteSurroundingText(1, 0)
-                    "⇧" -> { /* This compact IME leaves case control to the app; standard IME remains switchable. */ }
-                    else -> commit(key)
+                    "⇧" -> {
+                        shifted = !shifted
+                        refreshKeyLabels()
+                    }
+                    else -> {
+                        commit(if (shifted) key.uppercase() else key)
+                        if (shifted) {
+                            shifted = false
+                            refreshKeyLabels()
+                        }
+                    }
                 }
             })
         }
         val params = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(42))
         params.bottomMargin = dp(4)
         parent.addView(row, params)
+    }
+
+    private fun refreshKeyLabels() {
+        // Update letter keys in-place; preserve the special keys and their handlers.
+        root?.let { layout ->
+            fun visit(view: View) {
+                if (view is Button) {
+                    val label = view.text.toString()
+                    if (label.length == 1 && label[0].isLetter()) {
+                        view.text = if (shifted) label.uppercase() else label.lowercase()
+                    }
+                }
+                if (view is LinearLayout) {
+                    for (index in 0 until view.childCount) visit(view.getChildAt(index))
+                }
+            }
+            visit(layout)
+        }
     }
 
     private fun actionButton(label: String, action: () -> Unit): Button =
