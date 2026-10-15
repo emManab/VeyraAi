@@ -54,7 +54,7 @@ class OpenAIClient {
               'Content-Type': 'application/json',
               'Authorization': 'Bearer $apiKey',
             },
-            body: jsonEncode({'model': model, 'messages': messages}),
+            body: jsonEncode({'model': model, 'messages': messages, 'temperature': 0.65, 'max_tokens': 900}),
           )
           .timeout(_timeout);
 
