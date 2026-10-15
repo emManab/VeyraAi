@@ -450,10 +450,34 @@ REQUIRED OUTPUT SHAPE
       ]),
       const SizedBox(height: 14),
       SizedBox(width: double.infinity, child: FilledButton.icon(onPressed: _wingmanStarted ? _stopWingman : _startWingman, icon: Icon(_wingmanStarted ? Icons.stop_circle_outlined : Icons.play_circle_outline), label: Text(_wingmanStarted ? 'Stop Wingman' : 'Start Wingman'))),
-      if (Platform.isAndroid) Padding(
-        padding: const EdgeInsets.only(top: 8),
-        child: Text('Allow display-over-apps, Usage Access, and Android screen-capture consent. Open WhatsApp, Instagram, Tinder, Bumble, or Hinge; tap the V bubble to analyze the current screen. The reply panel appears when you return to the chat app.', style: TextStyle(color: muted, fontSize: 12)),
-      ),
+      if (Platform.isAndroid) ...[
+        const SizedBox(height: 8),
+        Row(children: [
+          Expanded(child: OutlinedButton.icon(
+            onPressed: () async {
+              try { await _native.invokeMethod<bool>('openKeyboardSettings'); } on PlatformException catch (e) {
+                if (mounted) setState(() => _error = e.message ?? 'Could not open keyboard settings.');
+              }
+            },
+            icon: const Icon(Icons.keyboard_alt_outlined, size: 17),
+            label: const Text('Enable keyboard'),
+          )),
+          const SizedBox(width: 8),
+          Expanded(child: OutlinedButton.icon(
+            onPressed: () async {
+              try { await _native.invokeMethod<bool>('showKeyboardPicker'); } on PlatformException catch (e) {
+                if (mounted) setState(() => _error = e.message ?? 'Could not show keyboard picker.');
+              }
+            },
+            icon: const Icon(Icons.swap_horiz_rounded, size: 17),
+            label: const Text('Select keyboard'),
+          )),
+        ]),
+        Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text('If an app blocks screenshots: copy the last few chat messages, switch to Veyra Keyboard, tap Paste chat → Analyze. Return to the chat and tap a suggested reply to insert it.', style: TextStyle(color: muted, fontSize: 12)),
+        ),
+      ],
     ]),
   );
 
