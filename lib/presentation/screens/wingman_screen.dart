@@ -52,7 +52,9 @@ class _WingmanScreenState extends State<WingmanScreen> {
     if (Platform.isAndroid) {
       _nativeSubscription = _nativeEvents.receiveBroadcastStream().listen(
         (event) {
-          if (event is! Map || event['type'] != 'capture') return;
+          if (event is! Map || event['type'] != 'capture') {
+            return;
+          }
           final path = event['path']?.toString() ?? '';
           final recognizedText = event['ocrText']?.toString() ?? '';
           if (path.isEmpty) {
