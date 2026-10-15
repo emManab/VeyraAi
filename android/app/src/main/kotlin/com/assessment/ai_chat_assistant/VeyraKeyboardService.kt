@@ -417,7 +417,7 @@ class VeyraKeyboardService : InputMethodService() {
             listOf(
                 listOf("1","2","3","4","5","6","7","8","9","0"),
                 listOf("@","#","$","%","&","-","+","(",")","/"),
-                listOf("=<>","*","\"","' ",":",";","!","?","DELETE"),
+                listOf("=<>","*","\"",'",":",";","!","?","DELETE"),
             )
         }
         rows.forEachIndexed { index, labels ->
