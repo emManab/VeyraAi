@@ -259,7 +259,17 @@ class WingmanOverlayService : Service() {
             recognizer.process(input)
                 .addOnSuccessListener { recognized ->
                     recognizer.close()
-                    deliverCapture(file.absolutePath, recognized.text)
+                    // Keep reading order and approximate left/right bubble position so
+                    // text-only models can better infer who sent each message.
+                    val structuredOcr = recognized.textBlocks
+                        .flatMap { block -> block.lines }
+                        .sortedBy { line -> line.boundingBox?.top ?: Int.MAX_VALUE }
+                        .joinToString("\\n") { line ->
+                            val bounds = line.boundingBox
+                            val side = if (bounds != null && bounds.centerX() > input.width * 0.55f) "RIGHT" else "LEFT_OR_CENTER"
+                            "[y=${bounds?.top ?: -1}, side=$side] ${line.text}"
+                        }
+                    deliverCapture(file.absolutePath, structuredOcr.ifBlank { recognized.text })
                 }
                 .addOnFailureListener {
                     recognizer.close()
