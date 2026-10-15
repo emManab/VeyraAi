@@ -70,7 +70,17 @@ class WingmanOverlayService : Service() {
             "com.instagram.android",
             "com.tinder",
             "com.bumble.app",
-            "co.hinge.app"
+            "co.hinge.app",
+            "com.facebook.orca",
+            "org.telegram.messenger",
+            "org.thoughtcrime.securesms",
+            "com.snapchat.android",
+            "com.discord",
+            "com.google.android.apps.messaging",
+            "com.viber.voip",
+            "jp.naver.line.android",
+            "com.tencent.mm",
+            "com.skype.raider"
         )
     }
 
