@@ -13,7 +13,6 @@ import '../../domain/entities/ai_provider_config.dart';
 import '../../domain/entities/attachment.dart';
 import '../../domain/entities/message.dart';
 import '../../domain/repositories/ai_repository.dart';
-import '../../domain/repositories/settings_repository.dart';
 import '../../domain/usecases/usecases.dart';
 
 /// Screenshot-powered conversation helper. Screenshots stay local until Analyze is tapped.
@@ -114,8 +113,7 @@ class _WingmanScreenState extends State<WingmanScreen> {
     }
     setState(() { _busy = true; _error = null; _replies = []; });
     try {
-      final settings = sl<SettingsRepository>();
-      final configResult = await settings.getProviderConfig();
+      final configResult = await sl<GetProviderConfig>()();
       final config = configResult.$1 ?? AIProviderConfig.defaultConfig;
       final keyResult = await sl<GetApiKey>()(config.provider);
       final apiKey = keyResult.$1 ?? '';
