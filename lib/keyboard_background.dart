@@ -34,16 +34,16 @@ Future<void> wingmanKeyboardMain() async {
       aOptions: AndroidOptions(encryptedSharedPreferences: true),
     ),
   );
-  sl.registerLazySingleton<HiveSettingsSource>(() => HiveSettingsSource(_sl()));
-  sl.registerLazySingleton<SettingsRepository>(() => SettingsRepositoryImpl(_sl()));
-  sl.registerLazySingleton<OpenAIClient>(() => OpenAIClient(_sl<http.Client>()));
-  sl.registerLazySingleton<GeminiClient>(() => GeminiClient(sl<http.Client>()));
-  sl.registerLazySingleton<FreeAIClient>(() => FreeAIClient(sl<http.Client>()));
-  sl.registerLazySingleton<AIRepository>(
+  _sl.registerLazySingleton<HiveSettingsSource>(() => HiveSettingsSource(_sl()));
+  _sl.registerLazySingleton<SettingsRepository>(() => SettingsRepositoryImpl(_sl()));
+  _sl.registerLazySingleton<OpenAIClient>(() => OpenAIClient(_sl<http.Client>()));
+  _sl.registerLazySingleton<GeminiClient>(() => GeminiClient(_sl<http.Client>()));
+  _sl.registerLazySingleton<FreeAIClient>(() => FreeAIClient(_sl<http.Client>()));
+  _sl.registerLazySingleton<AIRepository>(
     () => AIRepositoryImpl(_sl<OpenAIClient>(), _sl<GeminiClient>(), _sl<FreeAIClient>()),
   );
-  sl.registerLazySingleton<GetProviderConfig>(() => GetProviderConfig(_sl()));
-  sl.registerLazySingleton<GetApiKey>(() => GetApiKey(_sl()));
+  _sl.registerLazySingleton<GetProviderConfig>(() => GetProviderConfig(_sl()));
+  _sl.registerLazySingleton<GetApiKey>(() => GetApiKey(_sl()));
   _keyboardAiChannel.setMethodCallHandler((call) async {
     if (call.method != 'analyze') {
       throw MissingPluginException('Unsupported keyboard action: ${call.method}');
