@@ -61,7 +61,14 @@ class GeminiClient {
           .post(
             uri,
             headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({'contents': contents}),
+            body: jsonEncode({
+              'contents': contents,
+              'generationConfig': {
+                'temperature': 0.65,
+                'maxOutputTokens': 900,
+                'responseMimeType': 'application/json',
+              },
+            }),
           )
           .timeout(_timeout);
 
@@ -95,9 +102,16 @@ class GeminiClient {
     }
     try {
       final json = jsonDecode(response.body) as Map<String, dynamic>;
-      final text =
-          json['candidates']?[0]?['content']?['parts']?[0]?['text'] as String?;
-      if (text == null || text.isEmpty) return (null, const InvalidResponseError());
+      final parts = json['candidates']?[0]?['content']?['parts'];
+      final text = parts is List
+          ? parts
+              .whereType<Map>()
+              .map((part) => part['text'])
+              .whereType<String>()
+              .where((part) => part.trim().isNotEmpty)
+              .join('\\n')
+          : '';
+      if (text.trim().isEmpty) return (null, const InvalidResponseError());
       return (text, null);
     } catch (_) {
       return (null, const InvalidResponseError());
