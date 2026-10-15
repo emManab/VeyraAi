@@ -17,6 +17,7 @@ import '../../presentation/screens/home_screen.dart';
 import '../../presentation/screens/history_screen.dart';
 import '../../presentation/screens/profile_screen.dart';
 import '../../presentation/screens/privacy_screen.dart';
+import '../../presentation/screens/wingman_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -43,6 +44,11 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/splash',
       builder: (context, state) => const SplashScreen(),
+    ),
+    GoRoute(
+      path: '/wingman',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const WingmanScreen(),
     ),
     GoRoute(
       path: '/profile',
