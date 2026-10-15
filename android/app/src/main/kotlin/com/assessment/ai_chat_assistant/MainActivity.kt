@@ -4,6 +4,9 @@ import android.app.Activity
 import android.app.AppOpsManager
 import android.content.Context
 import android.content.Intent
+import android.content.Context
+import android.view.inputmethod.InputMethodManager
+import org.json.JSONArray
 import android.media.projection.MediaProjectionManager
 import android.net.Uri
 import android.os.Build
@@ -23,6 +26,7 @@ class MainActivity : FlutterActivity() {
     private var eventSink: EventChannel.EventSink? = null
     private var pendingCapturePath: String? = null
     private var pendingOcrText: String = ""
+    private var pendingKeyboardText: String? = null
 
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -33,6 +37,21 @@ class MainActivity : FlutterActivity() {
                     Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(this)
                 )
                 "hasUsageAccess" -> result.success(hasUsageAccess())
+                "consumeKeyboardRequest" -> {
+                    val text = pendingKeyboardText
+                    pendingKeyboardText = null
+                    result.success(text)
+                }
+                "saveKeyboardReplies" -> {
+                    val replies = call.argument<List<String>>("replies") ?: emptyList()
+                    getSharedPreferences("veyra_wingman_keyboard", Context.MODE_PRIVATE)
+                        .edit().putString("replies_json", JSONArray(replies).toString()).apply()
+                    result.success(true)
+                }
+                "openKeyboardSettings" -> {
+                    (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showInputMethodPicker()
+                    result.success(true)
+                }
                 "startWingman" -> {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
                         startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
@@ -99,12 +118,20 @@ class MainActivity : FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         cacheCaptureIntent(intent)
+        pendingKeyboardText = intent?.getStringExtra("wingman_keyboard_text")
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
         cacheCaptureIntent(intent)
+        val keyboardText = intent.getStringExtra("wingman_keyboard_text")
+        if (!keyboardText.isNullOrBlank()) {
+            pendingKeyboardText = keyboardText
+            MethodChannel(flutterEngine!!.dartExecutor.binaryMessenger, channelName)
+                .invokeMethod("keyboardRequest", keyboardText)
+            intent.removeExtra("wingman_keyboard_text")
+        }
     }
 
     private fun hasUsageAccess(): Boolean {
