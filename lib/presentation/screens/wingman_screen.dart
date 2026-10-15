@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -25,6 +26,7 @@ class WingmanScreen extends StatefulWidget {
 
 class _WingmanScreenState extends State<WingmanScreen> {
   static const _native = MethodChannel('ai.veyra.wingman');
+  static const _nativeEvents = EventChannel('ai.veyra.wingman/events');
   static const _styles = ['Flirty', 'Playful', 'Smooth', 'Confident', 'Funny', 'Casual', 'Romantic'];
   final _picker = ImagePicker();
   final _contextController = TextEditingController();
@@ -33,7 +35,9 @@ class _WingmanScreenState extends State<WingmanScreen> {
   String? _error;
   bool _busy = false;
   bool _overlayPermissionGranted = false;
+  bool _usageAccessGranted = false;
   bool _wingmanStarted = false;
+  StreamSubscription<dynamic>? _nativeSubscription;
   List<_Reply> _replies = [];
   String _recognized = '';
   String _summary = '';
@@ -44,10 +48,36 @@ class _WingmanScreenState extends State<WingmanScreen> {
     super.initState();
     _loadHistory();
     _syncOverlayStatus();
+    if (Platform.isAndroid) {
+      _nativeSubscription = _nativeEvents.receiveBroadcastStream().listen(
+        (event) {
+          if (event is! Map || event['type'] != 'capture') return;
+          final path = event['path']?.toString() ?? '';
+          if (path.isEmpty) {
+            if (mounted) setState(() => _error = 'Screen capture was not ready. Stop Wingman and start it again.');
+            return;
+          }
+          if (!mounted) return;
+          setState(() {
+            _imagePath = path;
+            _replies = [];
+            _error = null;
+          });
+          // A bubble tap is explicit consent to analyze this one captured frame.
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _analyze();
+          });
+        },
+        onError: (Object error) {
+          if (mounted) setState(() => _error = 'Capture failed: $error');
+        },
+      );
+    }
   }
 
   @override
   void dispose() {
+    _nativeSubscription?.cancel();
     _contextController.dispose();
     super.dispose();
   }
@@ -62,7 +92,11 @@ class _WingmanScreenState extends State<WingmanScreen> {
     if (!Platform.isAndroid) return;
     try {
       final value = await _native.invokeMethod<bool>('isOverlayEnabled') ?? false;
-      if (mounted) setState(() => _overlayPermissionGranted = value);
+      final usage = await _native.invokeMethod<bool>('hasUsageAccess') ?? false;
+      if (mounted) setState(() {
+        _overlayPermissionGranted = value;
+        _usageAccessGranted = usage;
+      });
     } on PlatformException catch (e) {
       if (mounted) setState(() => _error = e.message ?? 'Unable to check overlay permission.');
     }
@@ -80,11 +114,20 @@ class _WingmanScreenState extends State<WingmanScreen> {
         setState(() {
           _wingmanStarted = result == true;
           if (!_wingmanStarted) {
-            _error = 'Grant display-over-other-apps permission, then start Wingman again.';
+            _error = !_overlayPermissionGranted
+                ? 'Allow Veyra to display over other apps, return here, then tap Start Wingman again.'
+                : (!_usageAccessGranted
+                    ? 'Enable Usage Access for Veyra, return here, then tap Start Wingman again.'
+                    : 'Allow Android screen capture, then start Wingman again if needed.');
           }
         });
       }
       await _syncOverlayStatus();
+      if (result == true && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Wingman is active. Open a supported chat app and tap the V bubble to analyze one screen.'),
+        ));
+      }
     } on PlatformException catch (e) {
       if (mounted) setState(() => _error = e.message ?? 'Could not start Wingman.');
     }
@@ -176,6 +219,16 @@ Give three distinct, concise, human-sounding replies. If context is missing or u
         if (replies.isEmpty && _summary.isEmpty) _error = 'No usable replies. Try a clearer screenshot or paste the latest messages.';
       });
       if (replies.isNotEmpty) {
+        if (Platform.isAndroid && _wingmanStarted) {
+          try {
+            await _native.invokeMethod<bool>('showSuggestions', {
+              'replies': replies.map((reply) => reply.text).toList(),
+              'reasons': replies.map((reply) => reply.why).toList(),
+            });
+          } on PlatformException {
+            // Keep the in-app suggestions available even if the overlay cannot refresh.
+          }
+        }
         final box = Hive.box('app_settings');
         final rawHistory = box.get('wingman_history_v1', defaultValue: <dynamic>[]) as List<dynamic>;
         rawHistory.insert(0, <String, String>{
@@ -320,13 +373,22 @@ Give three distinct, concise, human-sounding replies. If context is missing or u
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text('Floating assistant', style: TextStyle(color: foreground, fontWeight: FontWeight.w800)),
           const SizedBox(height: 3),
-          Text(Platform.isAndroid ? (_wingmanStarted ? 'Permission ready · screenshot import mode' : (_overlayPermissionGranted ? 'Overlay permission granted' : 'Android overlay setup')) : 'Screenshot import on this platform', style: TextStyle(color: muted, fontSize: 12)),
+          Text(Platform.isAndroid
+              ? (_wingmanStarted
+                  ? 'Active · bubble appears in supported chat apps'
+                  : (!_overlayPermissionGranted
+                      ? 'Needs display-over-apps permission'
+                      : (!_usageAccessGranted ? 'Needs Usage Access permission' : 'Ready to start')))
+              : 'Screenshot import on this platform', style: TextStyle(color: muted, fontSize: 12)),
         ])),
         Icon(_overlayPermissionGranted ? Icons.check_circle : Icons.info_outline, color: _overlayPermissionGranted ? Colors.green : muted),
       ]),
       const SizedBox(height: 14),
       SizedBox(width: double.infinity, child: FilledButton.icon(onPressed: _wingmanStarted ? _stopWingman : _startWingman, icon: Icon(_wingmanStarted ? Icons.stop_circle_outlined : Icons.play_circle_outline), label: Text(_wingmanStarted ? 'Stop Wingman' : 'Start Wingman'))),
-      if (Platform.isAndroid) Padding(padding: const EdgeInsets.only(top: 8), child: Text('Overlay permission is separate from screen-capture consent. This version provides screenshot import; native cross-app capture requires a MediaProjection session.', style: TextStyle(color: muted, fontSize: 12))),
+      if (Platform.isAndroid) Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: Text('Allow display-over-apps, Usage Access, and Android screen-capture consent. Open WhatsApp, Instagram, Tinder, Bumble, or Hinge; tap the V bubble to analyze the current screen. The reply panel appears when you return to the chat app.', style: TextStyle(color: muted, fontSize: 12)),
+      ),
     ]),
   );
 
