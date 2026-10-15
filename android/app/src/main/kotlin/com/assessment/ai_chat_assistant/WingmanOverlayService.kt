@@ -260,15 +260,12 @@ class WingmanOverlayService : Service() {
     }
 
     private fun deliverCapture(path: String, recognizedText: String) {
-        val event = Intent(ACTION_CAPTURED).setPackage(packageName)
-            .putExtra(EXTRA_PATH, path)
-            .putExtra("ocr_text", recognizedText)
-        sendBroadcast(event)
         val launch = packageManager.getLaunchIntentForPackage(packageName)
-        if (launch != null) {
-            launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            startActivity(launch)
-        }
+            ?: Intent(this, MainActivity::class.java)
+        launch.putExtra("wingman_capture_path", path)
+        launch.putExtra("wingman_ocr_text", recognizedText)
+        launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        startActivity(launch)
     }
 
     private fun foregroundTargetPackage(): String? {
