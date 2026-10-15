@@ -15,7 +15,6 @@ import android.view.inputmethod.EditorInfo
 import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
-import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import io.flutter.FlutterInjector
@@ -99,7 +98,7 @@ class VeyraKeyboardService : InputMethodService() {
             setTypeface(typeface, Typeface.BOLD)
             setPadding(dp(7), 0, 0, 0)
         })
-        toolbar.addView(brand, LinearLayout.LayoutParams(0, dp(44), 1f))
+        toolbar.addView(brand, LinearLayout.LayoutParams(0, dp(38), 1f))
         toolbar.addView(topAction("Paste chat", false) { pasteClipboard() })
         toolbar.addView(topAction("Analyze", true) { analyzeConversation() })
         shell.addView(toolbar)
@@ -113,7 +112,7 @@ class VeyraKeyboardService : InputMethodService() {
             setPadding(dp(10), dp(5), dp(10), dp(5))
             background = rounded(white, 12)
         }
-        val previewParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(38))
+        val previewParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(32))
         previewParams.topMargin = dp(4)
         shell.addView(conversationPreview, previewParams)
 
@@ -127,7 +126,7 @@ class VeyraKeyboardService : InputMethodService() {
             setTextColor(muted)
             maxLines = 1
         }
-        replyHeader.addView(statusText, LinearLayout.LayoutParams(0, dp(26), 1f))
+        replyHeader.addView(statusText, LinearLayout.LayoutParams(0, dp(21), 1f))
         progress = ProgressBar(this).apply {
             isIndeterminate = true
             visibility = View.GONE
@@ -162,7 +161,7 @@ class VeyraKeyboardService : InputMethodService() {
             maxLines = 3
             gravity = Gravity.CENTER_VERTICAL
         }
-        replyCard!!.addView(replyText, LinearLayout.LayoutParams(0, dp(57), 1f))
+        replyCard!!.addView(replyText, LinearLayout.LayoutParams(0, dp(49), 1f))
         insertButton = TextView(this).apply {
             text = "Insert"
             textSize = 12f
@@ -174,7 +173,7 @@ class VeyraKeyboardService : InputMethodService() {
             setOnClickListener { insertSelectedReply() }
         }
         replyCard!!.addView(insertButton, LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp(40)))
-        val replyParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(72))
+        val replyParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(60))
         replyParams.bottomMargin = dp(5)
         shell.addView(replyCard, replyParams)
 
@@ -227,7 +226,7 @@ class VeyraKeyboardService : InputMethodService() {
                 }
             }
             engine.dartExecutor.executeDartEntrypoint(
-                DartExecutor.DartEntrypoint(loader.findAppBundlePath(), "wingmanKeyboardMain")
+                DartExecutor.DartEntrypoint(loader.findAppBundlePath(), "wingmanKeyboardMain", "package:ai_chat_assistant/keyboard_background.dart")
             )
         } catch (error: Exception) {
             updateStatus("AI engine could not start. Reopen Veyra Keyboard.", error = true)
@@ -433,7 +432,7 @@ class VeyraKeyboardService : InputMethodService() {
                     "SHIFT", "DELETE", "=<>" -> 1.45f
                     else -> 1f
                 }
-                row.addView(key, LinearLayout.LayoutParams(0, dp(if (index == 2) 44 else 43), weight).apply {
+                row.addView(key, LinearLayout.LayoutParams(0, dp(if (index == 2) 39 else 38), weight).apply {
                     setMargins(dp(2), dp(2), dp(2), dp(2))
                 })
                 key.setOnClickListener { handleKey(label) }
@@ -444,7 +443,7 @@ class VeyraKeyboardService : InputMethodService() {
                     }
                 }
             }
-            host.addView(row, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(47)))
+            host.addView(row, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(42)))
         }
 
         val bottom = LinearLayout(this).apply {
@@ -461,12 +460,12 @@ class VeyraKeyboardService : InputMethodService() {
         )
         bottomKeys.forEach { (label, weight, action) ->
             val key = keyView(label, label == "?123" || label == "ABC" || label == "↵")
-            bottom.addView(key, LinearLayout.LayoutParams(0, dp(45), weight).apply {
+            bottom.addView(key, LinearLayout.LayoutParams(0, dp(40), weight).apply {
                 setMargins(dp(2), dp(2), dp(2), dp(2))
             })
             key.setOnClickListener { action() }
         }
-        host.addView(bottom, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(49)))
+        host.addView(bottom, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(44)))
     }
 
     private fun keyLabel(label: String): String = when (label) {
