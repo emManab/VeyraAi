@@ -28,7 +28,6 @@ void main() {
       ),
     );
     registerFallbackValue(AIProviderConfig.defaultConfig);
-    registerFallbackValue(<Attachment>[]);
   });
 
   setUp(() {
@@ -63,7 +62,7 @@ void main() {
           userMessage: any(named: 'userMessage'),
           config: any(named: 'config'),
           apiKey: any(named: 'apiKey'),
-          attachments: any(named: 'attachments'),
+          attachments: const <Attachment>[],
         )).thenAnswer((_) async => ('Hello human', null));
 
     final (result, error) = await usecase(
@@ -118,7 +117,7 @@ void main() {
           userMessage: any(named: 'userMessage'),
           config: any(named: 'config'),
           apiKey: any(named: 'apiKey'),
-          attachments: any(named: 'attachments'),
+          attachments: const <Attachment>[],
         )).thenAnswer((_) async => (null, const NetworkError()));
 
     final (result, error) = await usecase(
