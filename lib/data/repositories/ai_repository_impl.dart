@@ -37,6 +37,7 @@ class AIRepositoryImpl implements AIRepository {
           model: config.modelName,
           history: history,
           userMessage: userMessage,
+          attachments: attachments,
         );
       case AIProvider.openai:
       case AIProvider.openaiCompatible:
@@ -49,6 +50,7 @@ class AIRepositoryImpl implements AIRepository {
           model: config.modelName,
           history: history,
           userMessage: userMessage,
+          attachments: attachments,
         );
     }
   }
