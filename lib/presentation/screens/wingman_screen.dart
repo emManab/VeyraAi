@@ -314,7 +314,7 @@ Give three distinct, concise, human-sounding replies. If context is missing or u
               label: Text(_busy ? 'Analyzing conversation…' : 'Analyze & suggest replies'),
             )),
             const SizedBox(height: 10),
-            Text('Screen text is extracted on-device. When you tap Analyze, extracted text is sent to your selected AI provider; a configured vision model also receives the screenshot. Veyra never sends messages automatically.', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: muted)),
+            Text('Tap the V bubble to capture and analyze one screen. OCR runs on-device; recognized text is sent to your selected AI provider. A configured vision model also receives the screenshot. Veyra never sends messages automatically.', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: muted)),
             if (_error != null) ...[
               const SizedBox(height: 12),
               Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: Theme.of(context).colorScheme.errorContainer, borderRadius: BorderRadius.circular(12)), child: Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer))),
