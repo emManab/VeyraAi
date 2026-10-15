@@ -48,7 +48,9 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/wingman',
       parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) => const WingmanScreen(),
+      builder: (context, state) => WingmanScreen(
+        initialText: state.uri.queryParameters['keyboardText'] ?? '',
+      ),
     ),
     GoRoute(
       path: '/profile',
