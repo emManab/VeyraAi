@@ -19,6 +19,7 @@ import 'domain/repositories/settings_repository.dart';
 import 'domain/usecases/usecases.dart';
 
 const _keyboardAiChannel = MethodChannel('ai.veyra.keyboard_ai');
+final _sl = GetIt.instance;
 
 /// Background Flutter entry point used by Veyra Keyboard's own engine.
 /// It deliberately does not run the app UI or launch MainActivity.
@@ -27,23 +28,22 @@ Future<void> wingmanKeyboardMain() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Register only the provider/key/AI dependencies. The keyboard engine deliberately
   // does not open Hive boxes, avoiding concurrent access with the main app engine.
-  final sl = GetIt.instance;
-  sl.registerLazySingleton<http.Client>(() => http.Client());
-  sl.registerLazySingleton<FlutterSecureStorage>(
+  _sl.registerLazySingleton<http.Client>(() => http.Client());
+  _sl.registerLazySingleton<FlutterSecureStorage>(
     () => const FlutterSecureStorage(
       aOptions: AndroidOptions(encryptedSharedPreferences: true),
     ),
   );
-  sl.registerLazySingleton<HiveSettingsSource>(() => HiveSettingsSource(sl()));
-  sl.registerLazySingleton<SettingsRepository>(() => SettingsRepositoryImpl(sl()));
-  sl.registerLazySingleton<OpenAIClient>(() => OpenAIClient(sl<http.Client>()));
+  sl.registerLazySingleton<HiveSettingsSource>(() => HiveSettingsSource(_sl()));
+  sl.registerLazySingleton<SettingsRepository>(() => SettingsRepositoryImpl(_sl()));
+  sl.registerLazySingleton<OpenAIClient>(() => OpenAIClient(_sl<http.Client>()));
   sl.registerLazySingleton<GeminiClient>(() => GeminiClient(sl<http.Client>()));
   sl.registerLazySingleton<FreeAIClient>(() => FreeAIClient(sl<http.Client>()));
   sl.registerLazySingleton<AIRepository>(
-    () => AIRepositoryImpl(sl<OpenAIClient>(), sl<GeminiClient>(), sl<FreeAIClient>()),
+    () => AIRepositoryImpl(_sl<OpenAIClient>(), _sl<GeminiClient>(), _sl<FreeAIClient>()),
   );
-  sl.registerLazySingleton<GetProviderConfig>(() => GetProviderConfig(sl()));
-  sl.registerLazySingleton<GetApiKey>(() => GetApiKey(sl()));
+  sl.registerLazySingleton<GetProviderConfig>(() => GetProviderConfig(_sl()));
+  sl.registerLazySingleton<GetApiKey>(() => GetApiKey(_sl()));
   _keyboardAiChannel.setMethodCallHandler((call) async {
     if (call.method != 'analyze') {
       throw MissingPluginException('Unsupported keyboard action: ${call.method}');
@@ -62,9 +62,9 @@ Future<void> wingmanKeyboardMain() async {
 }
 
 Future<Map<String, Object?>> _analyzeForKeyboard(String conversation) async {
-  final configResult = await sl<GetProviderConfig>()();
+  final configResult = await _sl<GetProviderConfig>()();
   final config = configResult.$1 ?? AIProviderConfig.defaultConfig;
-  final keyResult = await sl<GetApiKey>()(config.provider);
+  final keyResult = await _sl<GetApiKey>()(config.provider);
   final apiKey = keyResult.$1 ?? '';
   if (config.provider != AIProvider.veyraFree && apiKey.trim().isEmpty) {
     throw PlatformException(
@@ -116,7 +116,7 @@ JSON schema:
 }
 ''';
 
-  final result = await sl<AIRepository>().sendMessage(
+  final result = await _sl<AIRepository>().sendMessage(
     history: const <Message>[],
     userMessage: prompt,
     config: config,
