@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:ai_chat_assistant/domain/entities/ai_provider_config.dart';
+import 'package:ai_chat_assistant/domain/entities/attachment.dart';
 import 'package:ai_chat_assistant/domain/entities/conversation.dart';
 import 'package:ai_chat_assistant/domain/entities/message.dart';
 import 'package:ai_chat_assistant/domain/repositories/ai_repository.dart';
@@ -27,6 +28,7 @@ void main() {
       ),
     );
     registerFallbackValue(AIProviderConfig.defaultConfig);
+    registerFallbackValue(<Attachment>[]);
   });
 
   setUp(() {
@@ -61,6 +63,7 @@ void main() {
           userMessage: any(named: 'userMessage'),
           config: any(named: 'config'),
           apiKey: any(named: 'apiKey'),
+          attachments: any(named: 'attachments'),
         )).thenAnswer((_) async => ('Hello human', null));
 
     final (result, error) = await usecase(
@@ -82,6 +85,7 @@ void main() {
           userMessage: 'Hello AI',
           config: AIProviderConfig.defaultConfig,
           apiKey: 'test-key',
+          attachments: const <Attachment>[],
         )).called(1);
 
     // Verify two messages were saved: user and assistant
