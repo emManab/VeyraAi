@@ -14,6 +14,7 @@ import '../../domain/entities/attachment.dart';
 import '../../domain/entities/message.dart';
 import '../../domain/repositories/ai_repository.dart';
 import '../../domain/repositories/settings_repository.dart';
+import '../../domain/usecases/usecases.dart';
 
 /// Screenshot-powered conversation helper. Screenshots stay local until Analyze is tapped.
 class WingmanScreen extends StatefulWidget {
@@ -116,7 +117,7 @@ class _WingmanScreenState extends State<WingmanScreen> {
       final settings = sl<SettingsRepository>();
       final configResult = await settings.getProviderConfig();
       final config = configResult.$1 ?? AIProviderConfig.defaultConfig;
-      final keyResult = await settings.getApiKey(config.provider);
+      final keyResult = await sl<GetApiKey>()(config.provider);
       final apiKey = keyResult.$1 ?? '';
       if (config.provider != AIProvider.veyraFree && apiKey.trim().isEmpty) {
         throw Exception('Add an API key for the selected provider in Settings before analyzing a conversation.');
