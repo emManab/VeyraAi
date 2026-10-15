@@ -264,7 +264,7 @@ class WingmanOverlayService : Service() {
                     val structuredOcr = recognized.textBlocks
                         .flatMap { block -> block.lines }
                         .sortedBy { line -> line.boundingBox?.top ?: Int.MAX_VALUE }
-                        .joinToString("\\n") { line ->
+                        .joinToString("\n") { line ->
                             val bounds = line.boundingBox
                             val side = if (bounds != null && bounds.centerX() > input.width * 0.55f) "RIGHT" else "LEFT_OR_CENTER"
                             "[y=${bounds?.top ?: -1}, side=$side] ${line.text}"
